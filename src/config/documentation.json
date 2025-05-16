@@ -1,0 +1,7 @@
+{
+    "openapi": "3.1.0",
+    "info":{
+        "title": "Documentation API liste de tâche",
+        "version": "1.0.0"
+    }
+}
