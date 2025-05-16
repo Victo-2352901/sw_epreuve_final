@@ -1,98 +1,78 @@
-import db from '../config/db.js';
-
-import { uuid } from 'uuidv4';
+import db from "../config/db_pg.js";
+import {
+    uuid
+} from 'uuidv4';
 
 const ValidationCle = (cleApi) => {
     return new Promise((resolve, reject) => {
+        const requete = `SELECT count(*) AS nombre FROM utilisateurs WHERE cle_api = $1`;
+        const params = [cleApi];
 
-        const requete = `SELECT count(*) AS nombre FROM utilisateurs WHERE cle_api = ?`;
-        const params = [cleApi]; 
-
-        db.query(requete,params,(erreur, resultat) => {
+        db.query(requete, params, (erreur, resultat) => {
             if (erreur) {
+                console.log('Erreur sqlState : ' + erreur);
                 console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
-                // S'il y a une erreur, je la retourne avec reject()
                 reject(erreur);
             }
-            // Sinon je retourne le résultat sans faire de validation, c'est possible que le résultat soit vide
-            resolve(resultat);
+            resolve(resultat.rows);
         });
     });
 };
 
 const requeteAjoutUtilisateur = (nom, prenom, courriel, mot_de_passe) => {
     return new Promise((resolve, reject) => {
-
-        const requete = "INSERT INTO Utilisateurs(nom,prenom,courriel,cle_api,password) VALUES(?,?,?,?,?)";
-
+        const requete = "INSERT INTO utilisateurs (nom, prenom, courriel, cle_api, password) VALUES ($1, $2, $3, $4, $5)";
         let cle_api = uuid();
-
-// console.log(nom);
-// console.log(prenom);
-// console.log(courriel);
-// console.log(cle_api);
-// console.log(mot_de_passe);
-
         const params = [nom, prenom, courriel, cle_api, mot_de_passe];
 
-        db.query(requete,params,(erreur, resultat) => {
+        db.query(requete, params, (erreur, resultat) => {
             if (erreur) {
+                console.log('Erreur sqlState : ' + erreur);
                 console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
-                // S'il y a une erreur, je la retourne avec reject()
                 reject(erreur);
             }
-            // Sinon je retourne le résultat sans faire de validation, c'est possible que le résultat soit vide
-            resultat = {
-                "message" : "L'utilisateur à bien été ajouter ! || Clé d'api : " + cle_api
+
+            const message = {
+                message: "L'utilisateur à bien été ajouter ! || Clé d'api : " + cle_api
             };
-            resolve(resultat);
+            resolve(message);
         });
     });
 };
 
-
 const requeteRecupererCle = (courriel, mot_de_passe, generer) => {
     return new Promise((resolve, reject) => {
-// console.log(courriel);
-// console.log(mot_de_passe);
+        if (generer != "Nouveau") {
+            let requete = "SELECT cle_api FROM utilisateurs WHERE courriel = $1 AND password = $2";
+            const params = [courriel, mot_de_passe];
 
-if(generer != "Nouveau"){
-    let requete = "SELECT cle_api FROM Utilisateurs WHERE courriel = ? AND password = ?";
-
-    const params = [courriel, mot_de_passe];
-
-    db.query(requete,params,(erreur, resultat) => {
-        if (erreur) {
-            console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
-            // S'il y a une erreur, je la retourne avec reject()
-            reject(erreur);
-        }
-        // Sinon je retourne le résultat sans faire de validation, c'est possible que le résultat soit vide
-        console.log(resultat);
-        resolve(resultat);
-    });
-}
-else{
-    let requete = "UPDATE Utilisateurs SET cle_api = ? WHERE courriel = ? AND password = ?";
-
-        let nouvelleCle = uuid();
-    console.log(nouvelleCle);
-            const params = [nouvelleCle , courriel, mot_de_passe];
-
-            db.query(requete,params,(erreur, resultat) => {
+            db.query(requete, params, (erreur, resultat) => {
                 if (erreur) {
+                    console.log('Erreur sqlState : ' + erreur);
                     console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
-                    // S'il y a une erreur, je la retourne avec reject()
                     reject(erreur);
                 }
+                resolve(resultat.rows);
+            });
+        } else {
+            let requete = "UPDATE utilisateurs SET cle_api = $1 WHERE courriel = $2 AND password = $3";
+            let nouvelleCle = uuid();
+            const params = [nouvelleCle, courriel, mot_de_passe];
 
-                // Sinon je retourne le résultat sans faire de validation, c'est possible que le résultat soit vide
+            db.query(requete, params, (erreur, resultat) => {
+                if (erreur) {
+                    console.log('Erreur sqlState : ' + erreur);
+                    console.log(`Erreur sqlState ${erreur.sqlState} : ${erreur.sqlMessage}`);
+                    reject(erreur);
+                }
                 resolve(nouvelleCle);
             });
         }
     });
 };
 
-
-
-export {ValidationCle, requeteAjoutUtilisateur, requeteRecupererCle}
+export {
+    ValidationCle,
+    requeteAjoutUtilisateur,
+    requeteRecupererCle
+};

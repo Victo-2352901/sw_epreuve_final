@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+import db from "../config/db_pg.js";
 import express from 'express';
 import {listeTout, detailTache, ajouterTache, modifierTache, modifierStatutTache, supprimerTache} from '../controllers/liste.controller.js'
 

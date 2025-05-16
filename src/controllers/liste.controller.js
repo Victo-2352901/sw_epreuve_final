@@ -4,33 +4,11 @@ import { resourceUsage } from "process";
 import { requeteTache, requeteDetailTache, requeteAjouterTache, requeteModifierTache, requeteSupprimerTache, requeteModifierStatutTache} from "../models/liste.model.js";
 
 const listeTout = async (req, res) => {
-    const cle_api = req.headers.authorization;const ajoutUtilisateur = async (req, res) => {
-    if(req.body.nom && req.body.nom != "" && req.body.prenom && req.body.prenom != "" && req.body.courriel && req.body.courriel != "" && req.body.mot_de_passe && req.body.mot_de_passe != "")
-    {
-        await requeteAjoutUtilisateur(req.body.nom, req.body.prenom, req.body.courriel, req.body.mot_de_passe)
-    
-        .then((resultat) => {
-            res.send(resultat);
-        })
-        // S'il y a eu une erreur au niveau de la requête, on retourne un erreur 500 car c'est du serveur que provient l'erreur.
-        .catch((erreur) => {
-            console.log('Erreur : ', erreur);
-            res.status(500)
-            res.send({
-                message: "Erreur lors de la requête"
-            });
-        });
-    }
-    else{
-        res.status(400);
-        res.send("Cette route doit contenir les champs suivants : nom, prenom, courriel, mot_de_passe et ne doivent pas être vide");
-    }
+    const cle_api = req.headers.authorization;
 
-    
-} 
     let afficherCompleter = false;
 
-    if(req.query.complete && req.query.complete == 1){
+    if(req.query.complete && req.query.complete == "true"){
         afficherCompleter = true
     }
 
